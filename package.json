@@ -14,7 +14,8 @@
   },
   "types": "./lib/index.d.ts",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "patch": "npm run test && sf publish patch"
   },
   "files": [
     "lib"
