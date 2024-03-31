@@ -3,9 +3,22 @@
   "version": "1.0.0",
   "description": "Monocart Locator",
   "main": "./lib/index.js",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.mjs",
+      "require": "./lib/index.js",
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./lib/index.d.ts",
   "scripts": {
     "test": "mocha"
   },
+  "files": [
+    "lib"
+  ],
   "license": "MIT",
   "devDependencies": {
     "console-grid": "^2.2.2",

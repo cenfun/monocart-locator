@@ -4,7 +4,7 @@ const assert = require('assert');
 const EC = require('eight-colors');
 const CG = require('console-grid');
 
-const { LineParser } = require('../lib/');
+const { Locator } = require('../lib/');
 
 // test comments
 const files = [{
@@ -46,7 +46,9 @@ it('test comments', () => {
 
         const source = fs.readFileSync(item.path).toString('utf-8');
 
-        const lineParser = new LineParser(source);
+        const locator = new Locator(source);
+
+        const lineParser = locator.lineParser;
 
         // add line for comments
         lineParser.comments.forEach((comment) => {
