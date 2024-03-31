@@ -34,9 +34,9 @@ const files = [{
     commentsCount: 0,
     commentLinesCount: 0
 }, {
-    path: path.resolve('README.md'),
-    commentsCount: 0,
-    commentLinesCount: 0
+    path: path.resolve('.eslintrc.js'),
+    commentsCount: 3,
+    commentLinesCount: 3
 }];
 
 
@@ -60,57 +60,55 @@ it('test comments', () => {
         EC.logCyan(item.name);
         // console.log(commentLines.join('\n'));
 
-        assert.equal(lineParser.comments.length, item.commentsCount, 'comments count not matched');
-        assert.equal(commentLines.length, item.commentLinesCount, 'comment lines count not matched');
+        if (item.grid) {
+            CG({
+                columns: [{
+                    id: 'indent',
+                    formatter: (v) => {
+                        if (!v) {
+                            return '';
+                        }
+                        return v;
+                    }
+                }, {
+                    id: 'text',
+                    name: path.basename(item.path),
+                    formatter: (v, row) => {
+                        if (!v) {
+                            return '';
+                        }
 
-        if (!item.grid) {
-            return;
+                        if (row.comment) {
+                            return EC.blue(v);
+                        }
+
+                        return v;
+                    }
+                }, {
+                    id: 'blank',
+                    formatter: (v) => {
+                        if (!v) {
+                            return '';
+                        }
+                        return v;
+                    }
+                }, {
+                    id: 'comment',
+                    formatter: (v) => {
+                        if (!v) {
+                            return '';
+                        }
+                        return v;
+                    }
+                }, {
+                    id: 'length'
+                }],
+                rows: lineParser.lines
+            });
         }
 
-        CG({
-            columns: [{
-                id: 'indent',
-                formatter: (v) => {
-                    if (!v) {
-                        return '';
-                    }
-                    return v;
-                }
-            }, {
-                id: 'text',
-                name: path.basename(item.path),
-                formatter: (v, row) => {
-                    if (!v) {
-                        return '';
-                    }
-
-                    if (row.comment) {
-                        return EC.blue(v);
-                    }
-
-                    return v;
-                }
-            }, {
-                id: 'blank',
-                formatter: (v) => {
-                    if (!v) {
-                        return '';
-                    }
-                    return v;
-                }
-            }, {
-                id: 'comment',
-                formatter: (v) => {
-                    if (!v) {
-                        return '';
-                    }
-                    return v;
-                }
-            }, {
-                id: 'length'
-            }],
-            rows: lineParser.lines
-        });
+        assert.equal(lineParser.comments.length, item.commentsCount, `comments count not matched: ${item.path}`);
+        assert.equal(commentLines.length, item.commentLinesCount, `comment lines count not matched: ${item.path}`);
 
 
     });
