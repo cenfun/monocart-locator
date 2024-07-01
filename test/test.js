@@ -34,9 +34,9 @@ const files = [{
     commentsCount: 0,
     commentLinesCount: 0
 }, {
-    path: path.resolve('.eslintrc.js'),
-    commentsCount: 3,
-    commentLinesCount: 3
+    path: path.resolve('eslint.config.js'),
+    commentsCount: 2,
+    commentLinesCount: 2
 }];
 
 
