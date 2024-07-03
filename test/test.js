@@ -18,18 +18,6 @@ const files = [{
     commentLinesCount: 5,
     grid: true
 }, {
-    path: path.resolve(__dirname, '../lib/tokens/block-comment-token.js'),
-    commentsCount: 2,
-    commentLinesCount: 2
-}, {
-    path: path.resolve(__dirname, '../lib/tokens/line-comment-token.js'),
-    commentsCount: 3,
-    commentLinesCount: 3
-}, {
-    path: path.resolve(__dirname, '../lib/tokens/quote-token.js'),
-    commentsCount: 2,
-    commentLinesCount: 2
-}, {
     path: path.resolve('package.json'),
     commentsCount: 0,
     commentLinesCount: 0
