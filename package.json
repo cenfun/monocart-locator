@@ -1,6 +1,6 @@
 {
     "name": "monocart-locator",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "Monocart Locator",
     "main": "./lib/index.js",
     "exports": {
