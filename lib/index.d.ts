@@ -50,7 +50,7 @@ export class Locator {
     comments: CommentItem[];
 
     /** 1-base */
-    locationToOffset(loc: LocationItem): number;
+    locationToOffset(loc: { line: number; column: number }): number;
     offsetToLocation(offset: number): LocationItem;
 
     getSlice(start: number, end?: number): string;

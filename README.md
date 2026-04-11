@@ -102,7 +102,7 @@ Returned by `offsetToLocation()`. Extends `LineItem` with 1-based position:
 | Property | Type | Description |
 |---|---|---|
 | `line` | `number` | 1-based line number |
-| `column` | `number` | Column offset |
+| `column` | `number` | 0-based column offset |
 
 ### `CommentItem`
 | Property | Type | Description |

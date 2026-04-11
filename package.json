@@ -20,6 +20,16 @@
     "files": [
         "lib"
     ],
+    "keywords": [
+        "locator",
+        "source",
+        "position",
+        "offset",
+        "line",
+        "column",
+        "comment",
+        "parser"
+    ],
     "license": "MIT",
     "repository": {
         "type": "git",

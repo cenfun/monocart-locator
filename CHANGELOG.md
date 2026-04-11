@@ -18,6 +18,7 @@
 ## 1.0.1
 
 - Improved performance for comment and line parsing
+- Fixed unit test
 
 ## 1.0.0
 
