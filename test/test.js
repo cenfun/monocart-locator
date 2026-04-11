@@ -13,6 +13,11 @@ const files = [{
     commentLinesCount: 21,
     grid: true
 }, {
+    path: path.resolve(__dirname, 'cases/template.js'),
+    commentsCount: 12,
+    commentLinesCount: 10,
+    grid: true
+}, {
     path: path.resolve(__dirname, 'cases/comments.css'),
     commentsCount: 2,
     commentLinesCount: 5,
