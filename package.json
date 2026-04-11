@@ -23,10 +23,10 @@
     "license": "MIT",
     "dependencies": {},
     "devDependencies": {
-        "console-grid": "^2.2.2",
-        "eight-colors": "^1.3.0",
-        "eslint": "^9.6.0",
-        "eslint-config-plus": "^2.0.2",
-        "mocha": "^10.5.2"
+        "console-grid": "^2.2.4",
+        "eight-colors": "^1.3.3",
+        "eslint": "^10.2.0",
+        "eslint-config-plus": "^2.0.4",
+        "mocha": "^11.7.5"
     }
 }
