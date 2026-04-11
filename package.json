@@ -1,7 +1,7 @@
 {
     "name": "monocart-locator",
     "version": "1.0.2",
-    "description": "Monocart Locator",
+    "description": "A lightweight source code position locator for converting between offset and line/column, with built-in line and comment parsing",
     "main": "./lib/index.js",
     "exports": {
         ".": {
@@ -21,6 +21,10 @@
         "lib"
     ],
     "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cenfun/monocart-locator.git"
+    },
     "dependencies": {},
     "devDependencies": {
         "console-grid": "^2.2.4",
