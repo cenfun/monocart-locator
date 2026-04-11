@@ -36,7 +36,7 @@ export class LineParser {
 }
 
 
-export type LocationItem = LineItem & {
+export type LocationItem = Omit<LineItem, 'line'> & {
     /** 1-base */
     line: number;
     column: number;
