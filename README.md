@@ -3,12 +3,13 @@
 [![](https://badgen.net/npm/dw/monocart-locator)](https://www.npmjs.com/package/monocart-locator)
 ![](https://img.shields.io/github/license/cenfun/monocart-locator)
 
-> A Locator for the source code position between offset and line/column.
+> A lightweight source code position locator for converting between offset and line/column, with built-in line and comment parsing. Zero dependencies.
 
 ## Features
-- Position locator
-- Line parser
-- Comment parser
+- Convert between offset and line/column positions
+- Parse source code into lines with metadata (length, indent, blank, comment)
+- Detect line comments (`//`) and block comments (`/* */`) with template literal (`${}`) support
+- O(log n) position lookups via binary search
 
 ## Install
 ```sh
@@ -16,11 +17,100 @@ npm i monocart-locator
 ```
 
 ## Usage
-```js
-const locator = new Locator(source);
-console.log(locator.lines);
-console.log(locator.comments);
 
-const offset = locator.locationToOffset({ line: 1, column: 1 });
-const loc = locator.offsetToLocation(10);
+### Locator
+The main API for source code position conversion.
+```js
+const { Locator } = require('monocart-locator');
+// or
+// import { Locator } from 'monocart-locator';
+
+const locator = new Locator(source);
+
+// Convert 1-based line/column to offset
+const offset = locator.locationToOffset({ line: 2, column: 5 });
+
+// Convert offset to 1-based location
+const loc = locator.offsetToLocation(100);
+// { line, column, length, indent, start, end, blank, comment, text }
+
+// Get source substring
+const slice = locator.getSlice(0, 10);
+
+// Get line info by 1-based line number
+const lineInfo = locator.getLine(1);
+
+// Access all parsed lines and comments
+console.log(locator.lines);     // LineItem[]
+console.log(locator.comments);  // CommentItem[]
 ```
+
+### LineParser
+Parse source code into lines with metadata.
+```js
+const { LineParser } = require('monocart-locator');
+
+const lineParser = new LineParser(source);
+
+console.log(lineParser.lines);     // LineItem[]
+console.log(lineParser.comments);  // CommentItem[]
+
+// Find line by offset
+const lineInfo = lineParser.findLine(100);
+```
+
+### CommentParser
+Detect all line and block comments in source code.
+```js
+const { CommentParser } = require('monocart-locator');
+
+const commentParser = new CommentParser(source);
+
+console.log(commentParser.comments);  // CommentItem[]
+
+// Check if a range is inside a comment
+const isComment = commentParser.isComment(start, end);
+```
+
+## API
+
+### `Locator`
+| Property / Method | Description |
+|---|---|
+| `source` | Original source string |
+| `lines` | `LineItem[]` - all parsed lines |
+| `comments` | `CommentItem[]` - all parsed comments |
+| `locationToOffset({ line, column })` | Convert 1-based line and column to offset |
+| `offsetToLocation(offset)` | Convert offset to `LocationItem` (1-based line and column) |
+| `getSlice(start, end)` | Get source substring by offsets |
+| `getLine(line)` | Get `LineItem` by 1-based line number |
+
+### `LineItem`
+| Property | Type | Description |
+|---|---|---|
+| `line` | `number` | 0-based line number |
+| `length` | `number` | Line length (excluding newline) |
+| `indent` | `number` | Leading whitespace count |
+| `start` | `number` | Start offset in source |
+| `end` | `number` | End offset in source |
+| `blank` | `boolean` | Whether line has no non-whitespace content |
+| `comment` | `boolean` | Whether first non-whitespace is inside a comment |
+| `text` | `string` | Line text (excluding newline) |
+
+### `LocationItem`
+Returned by `offsetToLocation()`. Extends `LineItem` with 1-based position:
+| Property | Type | Description |
+|---|---|---|
+| `line` | `number` | 1-based line number |
+| `column` | `number` | Column offset |
+
+### `CommentItem`
+| Property | Type | Description |
+|---|---|---|
+| `block` | `boolean` | `true` for block comments (`/* */`), `false` for line comments (`//`) |
+| `start` | `number` | Start offset in source |
+| `end` | `number` | End offset in source |
+| `text` | `string` | Comment text including delimiters |
+
+## License
+MIT
