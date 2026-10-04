@@ -47,4 +47,10 @@ console.log('some*//thing'); /*
         console.log('some//*thing')
  */
 
+const r = /[//]/;
+const sourceMapPattern = /[/# sourceMappingURL=ghost.js.map/]/;
+const escapedSlashPattern = /https?:\/\/example\.com/;
+const ratio = 10 / 2; // division is not a regular expression
+console.log(r, sourceMapPattern, escapedSlashPattern, ratio);
+
 

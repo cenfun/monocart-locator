@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.4
+
+- Avoid mistaking `//` or `/*` inside short regexp character classes for comments, using bounded lookahead rather than a full JavaScript parser.
+
 ## 1.0.3
 
 - Fixed template literal expression (`${}`) handling in `CommentParser` - backticks, nested templates, and comments inside expressions are now parsed correctly
