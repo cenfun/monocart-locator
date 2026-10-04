@@ -60,7 +60,7 @@ const lineInfo = lineParser.findLine(100);
 ```
 
 ### CommentParser
-Detect line and block comments in source code with a lightweight scanner (not a full JavaScript parser). Short, single-line regexp character classes containing comment-like text, such as `/[//]/` and `/[/*]/`, are ignored as comments. Regexp literals whose closing slash is more than 31 characters from the opening slash are not protected; uncommon syntax such as division by an array containing a comment can also be misclassified.
+Detect line and block comments in source code with a lightweight scanner (not a full JavaScript parser). Single-line regexp character classes such as `/[//]/` and `/[/*]/` are protected when both `[` and the `//` or `/*` marker occur within 31 characters of the opening slash. After the marker, `]` and the closing slash may be anywhere on the same line. Markers outside the initial 31-character window and uncommon syntax such as division by an array containing a comment can still be misclassified.
 ```js
 const { CommentParser } = require('monocart-locator');
 

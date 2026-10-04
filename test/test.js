@@ -104,7 +104,7 @@ it('test comments', () => {
         assert.equal(commentLines.length, item.commentLinesCount, `comment lines count not matched: ${item.path}`);
 
         if (item.name === 'comments.js') {
-            for (const text of ['[//]', 'sourceMappingURL=ghost.js.map', 'https?:\\/\\/example']) {
+            for (const text of ['[//]', '[//# sourceMappingURL=ghost.js.map]', 'https?:\\/\\/example']) {
                 const start = source.indexOf(text);
                 assert.notEqual(start, -1);
                 assert.equal(lineParser.commentParser.isComment(start, start + text.length), false, `${text} is not a comment`);
@@ -122,6 +122,7 @@ it('distinguishes regular expressions from division and comments', () => {
         'const a = /[//]/g; // real comment',
         'const spaced = / foo/; // space after slash is still regexp',
         'const b = /[/# sourceMappingURL=ghost.js.map/]/;',
+        'const actualMap = /[//# sourceMappingURL=ghost.js.map]/; // source map-like regexp',
         'const c = /\\/\\/\\*x/; /* block comment */',
         'const d = 12 / 3 / 2; // division comment',
         'function match(value) { return /[//]/.test(value); }',
@@ -133,6 +134,7 @@ it('distinguishes regular expressions from division and comments', () => {
     assert.deepEqual(parser.comments.map((comment) => comment.text), [
         '// real comment',
         '// space after slash is still regexp',
+        '// source map-like regexp',
         '/* block comment */',
         '// division comment',
         '// in template'
@@ -143,7 +145,9 @@ it('only protects comment markers inside regexp character classes', () => {
     const source = [
         'const a = /[//]/; // line comment',
         'const b = /[/*]/; /* block comment */',
-        `const longer = /${'x'.repeat(26)}[//]/; // within scan limit`,
+        `const longer = /${'x'.repeat(28)}[//]/; // marker at scan limit`,
+        `const longClass = /[//${'x'.repeat(350)}]/; // closing slash beyond 128`,
+        `const longBlock = /[/*${'x'.repeat(300)}]/; /* distant block comment */`,
         'if (ok) /[//]/.exec("x"); // no prefix needed',
         'const c = /\\//; // escaped slash is not a comment',
         'const numbers = [// real line comment',
@@ -153,7 +157,9 @@ it('only protects comment markers inside regexp character classes', () => {
     assert.deepEqual(new CommentParser(source).comments.map((comment) => comment.text), [
         '// line comment',
         '/* block comment */',
-        '// within scan limit',
+        '// marker at scan limit',
+        '// closing slash beyond 128',
+        '/* distant block comment */',
         '// no prefix needed',
         '// escaped slash is not a comment',
         '// real line comment',
@@ -193,4 +199,16 @@ it('bounds lookahead for unterminated regexp classes', () => {
     assert.deepEqual(new CommentParser(escapedNewline).comments.map((comment) => comment.text), [
         '// after escaped newline'
     ]);
+
+    const escapedClassNewline = ['/[//\\', ']/; // next line'].join('\n');
+    assert.deepEqual(new CommentParser(escapedClassNewline).comments.map((comment) => comment.text), [
+        '//\\',
+        '// next line'
+    ]);
+
+    // Repeated malformed classes with early /* must not rescan the entire line.
+    const repeated = `${'/[/*x*/'.repeat(2000)}\n// next`;
+    const repeatedComments = new CommentParser(repeated).comments;
+    assert.equal(repeatedComments.length, 2001);
+    assert.equal(repeatedComments.at(-1).text, '// next');
 });

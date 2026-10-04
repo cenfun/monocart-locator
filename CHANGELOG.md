@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.5
+
+- Recognize comment-like markers near the start of a regexp character class even when its closing `]` and `/` appear later on the same line.
+- Scan to the end of the line after an early marker, while avoiding repeated line-end scans for unterminated character classes.
+
 ## 1.0.4
 
 - Avoid mistaking `//` or `/*` inside short regexp character classes for comments, using bounded lookahead rather than a full JavaScript parser.
