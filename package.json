@@ -1,6 +1,6 @@
 {
     "name": "monocart-locator",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "description": "A lightweight source code position locator for converting between offset and line/column, with built-in line and comment parsing",
     "main": "./lib/index.js",
     "exports": {

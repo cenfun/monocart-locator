@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.6
+
+- Fix `CommentParser` line comments ending at standalone `\r`, U+2028, or U+2029, so subsequent comments (including source map directives) are parsed separately.
+- Split `LineParser` lines at all ECMAScript line terminators, treating `\r\n` as one line break and preserving correct source offsets.
+
 ## 1.0.5
 
 - Recognize comment-like markers near the start of a regexp character class even when its closing `]` and `/` appear later on the same line.

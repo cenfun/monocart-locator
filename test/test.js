@@ -187,6 +187,58 @@ it('preserves comment boundaries for CRLF, block and EOF comments', () => {
     assert.equal(new CommentParser('/* unclosed').comments[0].text, '/* unclosed');
 });
 
+it('ends line comments at standalone CR and Unicode line terminators', () => {
+    for (const separator of ['\r', '\u2028', '\u2029']) {
+        const source = `// header${separator}//#      sourceMappingURL=real.js.map${separator}`;
+        const secondStart = source.indexOf('//#');
+        assert.deepEqual(new CommentParser(source).comments.map((comment) => [comment.block, comment.start, comment.end, comment.text]), [
+            [false, 0, secondStart - 1, '// header'],
+            [false, secondStart, source.length - 1, '//#      sourceMappingURL=real.js.map']
+        ], `separator: ${JSON.stringify(separator)}`);
+    }
+});
+
+it('splits lines at ECMAScript line terminators and preserves source offsets', () => {
+    const source = 'a\r\nb\rc\u2028d\u2029e\n';
+    const locator = new Locator(source);
+    assert.deepEqual(locator.lines.map((item) => [item.line, item.start, item.end, item.length, item.text]), [
+        [0, 0, 1, 1, 'a'],
+        [1, 3, 4, 1, 'b'],
+        [2, 5, 6, 1, 'c'],
+        [3, 7, 8, 1, 'd'],
+        [4, 9, 10, 1, 'e'],
+        [5, 11, 11, 0, '']
+    ]);
+    locator.lines.forEach(({ start }, index) => {
+        assert.equal(locator.offsetToLocation(start).line, index + 1);
+        assert.equal(locator.locationToOffset({
+            line: index + 1,
+            column: 0
+        }), start);
+    });
+    assert.deepEqual(new Locator('a\u0085b').lines.map((item) => item.text), ['a\u0085b']);
+    for (const separator of ['\r\n', '\n', '\r', '\u2028', '\u2029']) {
+        const trailing = new Locator(`a${separator}${separator}`);
+        assert.deepEqual(trailing.lines.map((item) => [item.start, item.text]), [
+            [0, 'a'], [1 + separator.length, ''], [1 + separator.length * 2, '']
+        ]);
+        assert.equal(trailing.offsetToLocation(trailing.source.length).line, 3);
+    }
+});
+
+it('marks comment-only lines after standalone CR and Unicode line terminators', () => {
+    const locator = new Locator('// header\r//# sourceMappingURL=real.js.map\u2028/* block */\u2029code');
+    assert.deepEqual(locator.lines.map(({ text, comment }) => [text, comment]), [
+        ['// header', true],
+        ['//# sourceMappingURL=real.js.map', true],
+        ['/* block */', true],
+        ['code', false]
+    ]);
+    assert.deepEqual(locator.comments.map(({ text }) => text), [
+        '// header', '//# sourceMappingURL=real.js.map', '/* block */'
+    ]);
+});
+
 it('bounds lookahead for unterminated regexp classes', () => {
     const source = `${'/['.repeat(60000)}\n// next line\r\nconst r = /[//]/; // after regexp`;
     const parser = new CommentParser(source);
