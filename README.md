@@ -18,12 +18,14 @@ npm i monocart-locator
 
 ## Usage
 
+### Upgrading from v1
+
+Starting in v2, the package is ESM-only. Use `import` in ES modules or `await import('monocart-locator')` from an async function in CommonJS. If you still need synchronous `require()`, stay on v1 (`npm install monocart-locator@1`).
+
 ### Locator
 The main API for source code position conversion.
 ```js
-const { Locator } = require('monocart-locator');
-// or
-// import { Locator } from 'monocart-locator';
+import { Locator } from 'monocart-locator';
 
 const locator = new Locator(source);
 
@@ -48,7 +50,7 @@ console.log(locator.comments);  // CommentItem[]
 ### LineParser
 Parse source code into lines with metadata.
 ```js
-const { LineParser } = require('monocart-locator');
+import { LineParser } from 'monocart-locator';
 
 const lineParser = new LineParser(source);
 
@@ -62,7 +64,7 @@ const lineInfo = lineParser.findLine(100);
 ### CommentParser
 Detect line and block comments in source code with a lightweight scanner (not a full JavaScript parser). Single-line regexp character classes such as `/[//]/` and `/[/*]/` are protected when both `[` and the `//` or `/*` marker occur within 31 characters of the opening slash. After the marker, `]` and the closing slash may be anywhere on the same line. Markers outside the initial 31-character window and uncommon syntax such as division by an array containing a comment can still be misclassified.
 ```js
-const { CommentParser } = require('monocart-locator');
+import { CommentParser } from 'monocart-locator';
 
 const commentParser = new CommentParser(source);
 
@@ -94,7 +96,7 @@ const isComment = commentParser.isComment(start, end);
 | `start` | `number` | Start offset in source |
 | `end` | `number` | End offset in source |
 | `blank` | `boolean` | Whether line has no non-whitespace content |
-| `comment` | `boolean` | Whether first non-whitespace is inside a comment |
+| `comment` | `boolean` | Whether the line is nonblank and all non-whitespace characters are inside comments |
 | `text` | `string` | Line text (excluding newline) |
 
 ### `LocationItem`
@@ -111,6 +113,10 @@ Returned by `offsetToLocation()`. Extends `LineItem` with 1-based position:
 | `start` | `number` | Start offset in source |
 | `end` | `number` | End offset in source |
 | `text` | `string` | Comment text including delimiters |
+
+## Tests
+
+Run `npm test` with Node.js 22.15.0 or later. The HTML coverage report is written to `.temp/coverage/index.html`.
 
 ## License
 MIT

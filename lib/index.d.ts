@@ -59,3 +59,12 @@ export class Locator {
     getLine(line: number): LineItem;
 
 }
+
+
+declare const locator: {
+    Locator: typeof Locator;
+    LineParser: typeof LineParser;
+    CommentParser: typeof CommentParser;
+};
+
+export default locator;

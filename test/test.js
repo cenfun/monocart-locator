@@ -1,24 +1,28 @@
-const fs = require('fs');
-const path = require('path');
-const assert = require('assert');
-const EC = require('eight-colors');
-const CG = require('console-grid');
-
-const { Locator, CommentParser } = require('../lib/');
+import fs from 'node:fs';
+import path from 'node:path';
+import assert from 'node:assert';
+import { it } from 'node:test';
+import EC from 'eight-colors';
+import CG from 'console-grid';
+import locatorApi, {
+    Locator,
+    LineParser,
+    CommentParser
+} from 'monocart-locator';
 
 // test comments
 const files = [{
-    path: path.resolve(__dirname, 'cases/comments.js'),
-    commentsCount: 16,
-    commentLinesCount: 21,
+    path: path.resolve(import.meta.dirname, 'cases/comments.js'),
+    commentsCount: 33,
+    commentLinesCount: 29,
     grid: true
 }, {
-    path: path.resolve(__dirname, 'cases/template.js'),
+    path: path.resolve(import.meta.dirname, 'cases/template.js'),
     commentsCount: 12,
     commentLinesCount: 10,
     grid: true
 }, {
-    path: path.resolve(__dirname, 'cases/comments.css'),
+    path: path.resolve(import.meta.dirname, 'cases/comments.css'),
     commentsCount: 2,
     commentLinesCount: 5,
     grid: true
@@ -32,6 +36,14 @@ const files = [{
     commentLinesCount: 2
 }];
 
+
+it('exposes the same constructors through named and default ESM exports', () => {
+    assert.deepStrictEqual(locatorApi, {
+        Locator,
+        LineParser,
+        CommentParser
+    });
+});
 
 it('test comments', () => {
     files.forEach((item) => {
@@ -116,6 +128,38 @@ it('test comments', () => {
     });
 });
 
+it('classifies nonblank lines containing only comments and whitespace', () => {
+    const source = [
+        '  /* note */  ',
+        '/* one *//* two */',
+        '/* one */ \t/* two */',
+        '/* one */ // two',
+        '/* one */ x /* two */',
+        'x /* note */',
+        '/* note */x',
+        '/* one */ /* multi',
+        '  ',
+        '  line */  /* next */  ',
+        'x'
+    ].join('\r\n');
+    const { lines } = new Locator(source);
+    assert.deepStrictEqual(lines.filter((line) => line.comment).map((line) => line.line), [0, 1, 2, 3, 7, 9]);
+    assert.deepStrictEqual(lines.filter((line) => line.blank).map((line) => line.line), [8]);
+});
+
+it('keeps tracking block comments after rejecting lines with code', () => {
+    const source = [
+        'x /* first',
+        '  first ends */',
+        '/* next */ x /* last',
+        '  last ends */  ',
+        '  x',
+        '  /* at EOF */  '
+    ].join('\n');
+    const { lines } = new Locator(source);
+    assert.deepStrictEqual(lines.map((line) => line.comment), [false, true, false, true, false, true]);
+});
+
 it('distinguishes regular expressions from division and comments', () => {
     const dollar = '$';
     const source = [
@@ -187,6 +231,25 @@ it('preserves comment boundaries for CRLF, block and EOF comments', () => {
     assert.equal(new CommentParser('/* unclosed').comments[0].text, '/* unclosed');
 });
 
+it('checks whether a range is contained in a single comment', () => {
+    assert.equal(new CommentParser('code').isComment(0, 4), false);
+
+    const source = 'x /* first */ x /* second */ x /* middle */ x /* fourth */ x /* last */ x';
+    const parser = new CommentParser(source);
+    assert.equal(parser.comments.length, 5);
+    for (const { start, end } of parser.comments) {
+        assert.equal(parser.isComment(start, end), true, source.slice(start, end));
+        assert.equal(parser.isComment(start + 2, end - 2), true);
+        assert.equal(parser.isComment(start, end + 1), false);
+    }
+
+    const [first, second] = parser.comments;
+    assert.equal(parser.isComment(0, 1), false);
+    assert.equal(parser.isComment(first.end, first.end + 1), false);
+    assert.equal(parser.isComment(first.start, second.end), false);
+    assert.equal(parser.isComment(source.length - 1, source.length), false);
+});
+
 it('ends line comments at standalone CR and Unicode line terminators', () => {
     for (const separator of ['\r', '\u2028', '\u2029']) {
         const source = `// header${separator}//#      sourceMappingURL=real.js.map${separator}`;
@@ -196,6 +259,14 @@ it('ends line comments at standalone CR and Unicode line terminators', () => {
             [false, secondStart, source.length - 1, '//#      sourceMappingURL=real.js.map']
         ], `separator: ${JSON.stringify(separator)}`);
     }
+});
+
+it('handles empty and non-string input in LineParser', () => {
+    const [empty] = new LineParser().lines;
+    assert.deepStrictEqual([empty.text, empty.length, empty.indent, empty.blank, empty.comment], ['', 0, 0, true, false]);
+
+    const [number] = new LineParser(0).lines;
+    assert.deepStrictEqual([number.text, number.length, number.indent, number.blank, number.comment], ['0', 1, 0, false, false]);
 });
 
 it('splits lines at ECMAScript line terminators and preserves source offsets', () => {
@@ -223,6 +294,42 @@ it('splits lines at ECMAScript line terminators and preserves source offsets', (
             [0, 'a'], [1 + separator.length, ''], [1 + separator.length * 2, '']
         ]);
         assert.equal(trailing.offsetToLocation(trailing.source.length).line, 3);
+    }
+});
+
+it('supports source slices and clamps locations at line boundaries', () => {
+    const source = '/*😀*/\r\n  x\n';
+    const locator = new Locator(source);
+
+    assert.equal(locator.getLine(1).text, '/*😀*/');
+    assert.equal(locator.getLine(3).blank, true);
+    assert.equal(typeof locator.getLine(4), 'undefined');
+    assert.equal(locator.getSlice(2, 4), '😀');
+    assert.equal(locator.getSlice(8), '  x\n');
+
+    const locations = [
+        [1, Infinity, 6],
+        [2, 99, 11],
+        [3, Infinity, source.length],
+        [4, 1, 0]
+    ];
+    for (const [line, column, offset] of locations) {
+        assert.equal(locator.locationToOffset({
+            line,
+            column
+        }), offset);
+    }
+
+    const offsets = [
+        [-1, 1, 0],
+        // LF in CRLF maps to the end of line 1.
+        [7, 1, 6],
+        [8, 2, 0],
+        [source.length + 1, 3, 0]
+    ];
+    for (const [offset, line, column] of offsets) {
+        const location = locator.offsetToLocation(offset);
+        assert.deepStrictEqual([location.line, location.column], [line, column]);
     }
 });
 
@@ -263,4 +370,12 @@ it('bounds lookahead for unterminated regexp classes', () => {
     const repeatedComments = new CommentParser(repeated).comments;
     assert.equal(repeatedComments.length, 2001);
     assert.equal(repeatedComments.at(-1).text, '// next');
+});
+
+it('recovers block comments after an unterminated regexp class at EOF', () => {
+    const source = 'const r = /[/* first */ /[/* last */';
+    assert.deepStrictEqual(new CommentParser(source).comments.map(({ text, end }) => [text, end]), [
+        ['/* first */', source.indexOf('*/') + 2],
+        ['/* last */', source.length]
+    ]);
 });

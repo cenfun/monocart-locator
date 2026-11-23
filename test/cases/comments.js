@@ -1,4 +1,4 @@
-/* eslint-disable no-trailing-spaces,line-comment-position,no-inline-comments,indent,no-multi-spaces,no-multiple-empty-lines */
+/* eslint-disable no-trailing-spaces,line-comment-position,no-inline-comments,indent,no-multi-spaces,no-multiple-empty-lines,no-tabs */
         // LineComment
 
 console.log('some"//"\\\'thing\\'); // comment /*  
@@ -53,5 +53,21 @@ const sourceMapCommentLike = /[//# sourceMappingURL=ghost.js.map]/;
 const escapedSlashPattern = /https?:\/\/example\.com/;
 const ratio = 10 / 2; // division is not a regular expression
 console.log(r, sourceMapPattern, sourceMapCommentLike, escapedSlashPattern, ratio);
+
+  /* note */  
+/* one *//* two */
+/* one */ 	/* two */
+/* one */ // two
+/* one */ console.log(ratio); /* two */
+console.log(ratio); /* note */
+/* note */console.log(ratio);
+/* one */ /* multi
+  
+  line */  /* next */  
+
+console.log(ratio); /* first
+  first ends */
+/* next */ console.log(ratio); /* last
+  last ends */  
 
 

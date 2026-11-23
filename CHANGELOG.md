@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0
+
+- **Breaking:** ESM only. Use `import` or dynamic `import()` instead of `require()`.
+- Fix comment-only line detection for adjacent comments and whitespace between or after comments.
+- Replace Mocha with `mcr test` and add coverage reports.
+
 ## 1.0.6
 
 - Fix `CommentParser` line comments ending at standalone `\r`, U+2028, or U+2029, so subsequent comments (including source map directives) are parsed separately.
