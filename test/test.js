@@ -250,6 +250,15 @@ it('checks whether a range is contained in a single comment', () => {
     assert.equal(parser.isComment(source.length - 1, source.length), false);
 });
 
+it('resolves adjacent comment ranges at their shared boundaries', () => {
+    const parser = new CommentParser('/*a*//*b*//*c*//*d*//*e*/');
+    assert.equal(parser.comments.length, 5);
+    for (const { start, end } of parser.comments) {
+        assert.equal(parser.isComment(start, end), true, `range [${start}, ${end})`);
+    }
+    assert.equal(parser.isComment(14, 16), false);
+});
+
 it('ends line comments at standalone CR and Unicode line terminators', () => {
     for (const separator of ['\r', '\u2028', '\u2029']) {
         const source = `// header${separator}//#      sourceMappingURL=real.js.map${separator}`;

@@ -85,7 +85,7 @@ const isComment = commentParser.isComment(start, end);
 | `locationToOffset({ line, column })` | Convert 1-based line and column to offset |
 | `offsetToLocation(offset)` | Convert offset to `LocationItem` (1-based line and column) |
 | `getSlice(start, end)` | Get source substring by offsets |
-| `getLine(line)` | Get `LineItem` by 1-based line number |
+| `getLine(line)` | Get `LineItem` by 1-based line number, or `undefined` if out of range |
 
 ### `LineItem`
 | Property | Type | Description |

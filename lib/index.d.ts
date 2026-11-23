@@ -55,8 +55,8 @@ export class Locator {
 
     getSlice(start: number, end?: number): string;
 
-    /** 1-base to 0-base */
-    getLine(line: number): LineItem;
+    /** 1-based line number; returns undefined when out of range. */
+    getLine(line: number): LineItem | undefined;
 
 }
 

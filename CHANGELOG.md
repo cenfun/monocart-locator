@@ -4,6 +4,7 @@
 
 - **Breaking:** ESM only. Use `import` or dynamic `import()` instead of `require()`.
 - Fix comment-only line detection for adjacent comments and whitespace between or after comments.
+- Fix range queries at adjacent comment boundaries and correct the return type of `getLine()`.
 - Replace Mocha with `mcr test` and add coverage reports.
 
 ## 1.0.6
